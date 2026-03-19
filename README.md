@@ -1,2 +1,2 @@
-# klevrlab.githuh.io
+# klevrlab.github.io
 Klevr Lab Github pages
