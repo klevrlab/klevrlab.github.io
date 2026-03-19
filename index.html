@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KLEVR Lab — Web AR Workshop Outline</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --accent: #00f5c4;
+    --accent2: #7b5ea7;
+    --accent3: #ff6b6b;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --done-bg: #0d1f1a;
+    --link: #5eb8ff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,196,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,196,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; position: relative; z-index: 1; }
+  .header { margin-bottom: 2.5rem; animation: fadeDown 0.6s ease both; }
+
+  .klevr-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    border: 1px solid var(--accent);
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    margin-bottom: 1rem;
+    border-radius: 2px;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .subtitle span { display: flex; align-items: center; gap: 0.4rem; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  .progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+
+  .progress-bar-track { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .section {
+    margin-bottom: 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section:nth-child(1) { animation-delay: 0.15s; }
+  .section:nth-child(2) { animation-delay: 0.22s; }
+  .section:nth-child(3) { animation-delay: 0.29s; }
+  .section:nth-child(4) { animation-delay: 0.36s; }
+  .section:nth-child(5) { animation-delay: 0.43s; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .section-header:hover { background: rgba(255,255,255,0.03); }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    background: rgba(0,245,196,0.08);
+    border: 1px solid rgba(0,245,196,0.2);
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+    min-width: 2.5rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .section-title-wrap { flex: 1; }
+  .section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .section-meta { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-top: 0.15rem; }
+  .section-time { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+  .chevron { color: var(--muted); transition: transform 0.3s ease; font-size: 0.8rem; }
+  .section.open .chevron { transform: rotate(180deg); }
+  .section-body { display: none; border-top: 1px solid var(--border); padding: 0.5rem 0; }
+  .section.open .section-body { display: block; }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 0.65rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .item:hover { background: rgba(255,255,255,0.025); }
+  .item.done { background: var(--done-bg); }
+  .item.done .item-text { color: var(--muted); text-decoration: line-through; }
+  .item.done .item-detail { opacity: 0.4; }
+
+  .checkbox {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .item.done .checkbox { background: var(--accent); border-color: var(--accent); }
+  .checkmark { display: none; color: #000; font-size: 0.65rem; font-weight: 700; }
+  .item.done .checkmark { display: block; }
+
+  .item-content { flex: 1; min-width: 0; }
+  .item-top { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .item-text { font-size: 0.9rem; line-height: 1.5; color: var(--text); transition: color 0.2s; }
+
+  .item-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-hands-on { background: rgba(123,94,167,0.2); color: var(--accent2); border: 1px solid rgba(123,94,167,0.3); }
+  .badge-demo     { background: rgba(0,245,196,0.1);  color: var(--accent);  border: 1px solid rgba(0,245,196,0.2); }
+  .badge-discuss  { background: rgba(255,107,107,0.1);color: var(--accent3); border: 1px solid rgba(255,107,107,0.2); }
+
+  .item-detail {
+    display: none;
+    margin-top: 0.75rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: #b0b0cc;
+  }
+  .item-detail.open { display: block; }
+  .item-detail p { margin-bottom: 0.55rem; }
+  .item-detail p:last-child { margin-bottom: 0; }
+
+  .item-detail code {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    background: rgba(0,245,196,0.07);
+    border: 1px solid rgba(0,245,196,0.15);
+    border-radius: 3px;
+    padding: 0.05rem 0.35rem;
+    color: var(--accent);
+  }
+
+  .item-detail pre {
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    margin: 0.6rem 0;
+  }
+  .item-detail pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.76rem;
+    color: #c8f0e0;
+    display: block;
+    white-space: pre;
+  }
+
+  .item-detail a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(94,184,255,0.3);
+    transition: border-color 0.15s;
+  }
+  .item-detail a:hover { border-color: var(--link); }
+
+  .link-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+
+  .link-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--link);
+    background: rgba(94,184,255,0.07);
+    border: 1px solid rgba(94,184,255,0.2);
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(94,184,255,0.2);
+    transition: background 0.15s;
+  }
+  .link-pill:hover { background: rgba(94,184,255,0.14); }
+
+  .expand-hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--accent2);
+    margin-top: 0.2rem;
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    animation: fadeUp 0.5s 0.5s ease both;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .reset-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { color: var(--accent3); border-color: var(--accent3); }
+
+  .legend {
+    display: flex;
+    gap: 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .legend span { display: flex; align-items: center; gap: 0.35rem; }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-12px);} to {opacity:1;transform:translateY(0);} }
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(14px); } to {opacity:1;transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="klevr-tag">KLEVR Lab</div>
+    <h1>Web AR Workshop</h1>
+    <div class="subtitle">
+      <span><span class="dot"></span> Under 60 min</span>
+      <span><span class="dot"></span> Students &amp; Learners</span>
+      <span><span class="dot"></span> Hands-on</span>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Workshop Progress</span>
+      <span id="progress-text">0 / 0 complete</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div id="sections-wrap"></div>
+
+  <div class="footer">
+    <div class="legend">
+      <span><span class="item-badge badge-hands-on">Hands-on</span> tap to expand guide + links</span>
+      <span><span class="item-badge badge-demo">Demo</span></span>
+      <span><span class="item-badge badge-discuss">Discuss</span></span>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
+  </div>
+
+</div>
+<script>
+const data = [
+  {
+    num:"00", title:"Welcome & Setup", meta:"Framing the session", time:"~5 min",
+    items:[
+      {text:"Introduce KLEVR Lab and facilitators", badge:"discuss"},
+      {text:"Share the workshop agenda and goals", badge:"discuss"},
+      {text:"Poll the room — who has tried AR before?", badge:"discuss"},
+      {text:"Ensure everyone has a device + browser ready", badge:"hands-on", detail:`
+        <p><strong>What students need:</strong> A smartphone (iOS or Android) with a modern browser. Chrome on Android works best; Safari on iOS 11+ also works. No app installs required.</p>
+        <p><strong>Facilitator tip:</strong> Ask everyone to open their browser now and confirm camera permissions work before moving on — a quick check now saves time later.</p>
+        <p><strong>Hiro marker:</strong> This is the AR target your scene will track. Display it on a second screen or print it out in advance.</p>
+        <div class="link-row">
+          <a class="link-pill" href="https://jeromeetienne.github.io/AR.js/data/images/hiro.png" target="_blank">🖨 Hiro Marker image</a>
+          <a class="link-pill" href="https://caniuse.com/webrtc" target="_blank">📱 Browser compatibility check</a>
+        </div>
+      `}
+    ]
+  },
+  {
+    num:"01", title:"What is Web AR?", meta:"Concept + context", time:"~8 min",
+    items:[
+      {text:"AR vs. VR vs. MR — quick definitions", badge:"discuss"},
+      {text:"Show real-world Web AR examples (portfolios, retail, education)", badge:"demo"},
+      {text:"How Web AR works: cameras, markers, 3D rendering", badge:"discuss"},
+      {text:"Key tools overview: A-Frame, AR.js, model-viewer", badge:"demo"}
+    ]
+  },
+  {
+    num:"02", title:"Build Your First AR Scene", meta:"Core hands-on block", time:"~20 min",
+    items:[
+      {text:"Set up a basic HTML file with A-Frame + AR.js CDN links", badge:"hands-on", detail:`
+        <p>Create a new file called <code>index.html</code> and paste in this boilerplate. The two <code>&lt;script&gt;</code> tags pull in A-Frame and AR.js from CDN — no installs needed.</p>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;My AR Scene&lt;/title&gt;
+    &lt;script src="https://aframe.io/releases/1.6.0/aframe.min.js"&gt;&lt;/script&gt;
+    &lt;script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body style="margin:0; overflow:hidden;"&gt;
+    &lt;!-- Scene goes here --&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        <div class="link-row">
+          <a class="link-pill" href="https://aframe.io/docs/1.6.0/introduction/" target="_blank">📖 A-Frame Docs</a>
+          <a class="link-pill" href="https://ar-js-org.github.io/AR.js-Docs/" target="_blank">📖 AR.js Docs</a>
+          <a class="link-pill" href="https://codepen.io/pen/" target="_blank">✏️ Edit live on CodePen</a>
+        </div>
+      `},
+      {text:"Add a scene, camera, and marker to your page", badge:"hands-on", detail:`
+        <p>Inside your <code>&lt;body&gt;</code>, add an <code>&lt;a-scene&gt;</code> with the <code>embedded arjs</code> attributes. This tells AR.js to use the webcam and look for the Hiro marker.</p>
+        <pre><code>&lt;a-scene embedded arjs&gt;
+  &lt;a-marker preset="hiro"&gt;
+    &lt;!-- 3D content goes here --&gt;
+    &lt;a-box position="0 0.5 0" color="tomato"&gt;&lt;/a-box&gt;
+  &lt;/a-marker&gt;
+  &lt;a-entity camera&gt;&lt;/a-entity&gt;
+&lt;/a-scene&gt;</code></pre>
+        <p>This renders a red box floating above the Hiro marker. Hold the marker in front of your camera to test — it should appear immediately!</p>
+        <div class="link-row">
+          <a class="link-pill" href="https://aframe.io/blog/arjs/" target="_blank">📖 A-Frame + AR.js full tutorial</a>
+        </div>
+      `},
+      {text:"Load a 3D model (glTF/GLB) into the AR scene", badge:"hands-on", detail:`
+        <p>Replace the <code>&lt;a-box&gt;</code> placeholder with a <code>&lt;a-gltf-model&gt;</code> tag. You'll need a <code>.glb</code> or <code>.gltf</code> file — grab a free one from Poly Pizza first (see links below).</p>
+        <pre><code>&lt;a-marker preset="hiro"&gt;
+  &lt;a-gltf-model
+    src="your-model.glb"
+    position="0 0 0"
+    rotation="-90 0 0"
+    scale="0.5 0.5 0.5"&gt;
+  &lt;/a-gltf-model&gt;
+&lt;/a-marker&gt;</code></pre>
+        <p>Adjust <code>scale</code> and <code>rotation</code> to get the model looking right — values vary between models. Start with <code>scale="0.1 0.1 0.1"</code> if unsure.</p>
+        <div class="link-row">
+          <a class="link-pill" href="https://poly.pizza/" target="_blank">🍕 Free models — Poly Pizza</a>
+          <a class="link-pill" href="https://sketchfab.com/features/free-3d-models" target="_blank">🎨 Free models — Sketchfab</a>
+          <a class="link-pill" href="https://aframe.io/docs/1.6.0/components/gltf-model.html" target="_blank">📖 A-Frame glTF docs</a>
+        </div>
+      `},
+      {text:"Test on mobile — point camera at a Hiro marker", badge:"hands-on", detail:`
+        <p><strong>Important:</strong> AR.js requires the page to be served over <code>https://</code> — it won't work from a plain <code>file://</code> path on mobile.</p>
+        <p><strong>Quickest options:</strong></p>
+        <p>• <strong>CodePen</strong> — paste your HTML into codepen.io and get an instant HTTPS preview URL you can open on mobile<br>
+        • <strong>VS Code Live Server</strong> — serves localhost; accessible on the same Wi-Fi from your phone at your machine's local IP (e.g. <code>http://192.168.x.x:5500</code>)<br>
+        • <strong>GitHub Pages</strong> — takes a few extra steps but gives you a permanent public URL</p>
+        <p>When testing: hold the Hiro marker flat and steady with good lighting. AR.js struggles in low-light conditions.</p>
+        <div class="link-row">
+          <a class="link-pill" href="https://codepen.io/pen/" target="_blank">✏️ CodePen (instant HTTPS)</a>
+          <a class="link-pill" href="https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer" target="_blank">🔌 VS Code Live Server</a>
+        </div>
+      `},
+      {text:"Troubleshoot common issues (HTTPS, permissions, scale)", badge:"discuss", detail:`
+        <p><strong>Camera permission denied:</strong> On iOS → Settings → Safari → Camera → Allow. On Android → tap "Allow" when the browser prompts.</p>
+        <p><strong>Model not visible / too small:</strong> Try <code>scale="0.05 0.05 0.05"</code> to start tiny, then increase until it looks right.</p>
+        <p><strong>Model upside down or sideways:</strong> Try <code>rotation="-90 0 0"</code> or <code>rotation="0 180 0"</code> — different models use different axis conventions.</p>
+        <p><strong>Page won't load on mobile:</strong> Must be HTTPS. Use CodePen, GitHub Pages, or a local server on the same Wi-Fi network.</p>
+      `}
+    ]
+  },
+  {
+    num:"03", title:"Customise & Enhance", meta:"Make it your own", time:"~15 min",
+    items:[
+      {text:"Swap in a custom 3D model or use a free asset (Sketchfab, Poly Pizza)", badge:"hands-on", detail:`
+        <p>Head to one of these free asset libraries and download a <code>.glb</code> file. Low-poly models load faster and track more reliably in AR.</p>
+        <p><strong>Tips for good AR models:</strong> Keep file size under 5MB, prefer GLB over GLTF+textures, and choose models that look good from above (since they sit on a flat marker).</p>
+        <div class="link-row">
+          <a class="link-pill" href="https://poly.pizza/explore" target="_blank">🍕 Poly Pizza — browse all (10,500+ free)</a>
+          <a class="link-pill" href="https://sketchfab.com/features/free-3d-models" target="_blank">🎨 Sketchfab free models</a>
+          <a class="link-pill" href="https://market.pmnd.rs/" target="_blank">🌐 Pmndrs Market (CC0)</a>
+        </div>
+      `},
+      {text:"Add animation: rotation, float, or on-click interaction", badge:"hands-on", detail:`
+        <p>A-Frame has a built-in <code>animation</code> component — add it as an HTML attribute, no JavaScript required for basic effects.</p>
+        <pre><code>&lt;!-- Spin continuously --&gt;
+&lt;a-gltf-model src="model.glb"
+  animation="property: rotation;
+             to: 0 360 0;
+             loop: true;
+             dur: 3000;
+             easing: linear"&gt;
+&lt;/a-gltf-model&gt;
+
+&lt;!-- Float up and down --&gt;
+&lt;a-gltf-model src="model.glb"
+  animation="property: position;
+             to: 0 0.3 0;
+             dir: alternate;
+             loop: true;
+             dur: 1500"&gt;
+&lt;/a-gltf-model&gt;</code></pre>
+        <div class="link-row">
+          <a class="link-pill" href="https://aframe.io/docs/1.6.0/components/animation.html" target="_blank">📖 A-Frame animation docs</a>
+        </div>
+      `},
+      {text:"Style the surrounding page for a polished portfolio look", badge:"hands-on", detail:`
+        <p>The AR canvas fills the whole screen, but you can overlay styled HTML using absolute positioning. Add a title, description, and your name on top of the AR view.</p>
+        <pre><code>&lt;style&gt;
+  #overlay {
+    position: fixed;
+    top: 1rem; left: 1rem;
+    z-index: 10;
+    color: white;
+    font-family: sans-serif;
+    background: rgba(0,0,0,0.55);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    max-width: 220px;
+  }
+&lt;/style&gt;
+
+&lt;div id="overlay"&gt;
+  &lt;h2&gt;My AR Project&lt;/h2&gt;
+  &lt;p&gt;Point at the Hiro marker to see the 3D model!&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+        <p>This is what turns a tech demo into a portfolio piece — give it your own personality, colours, and branding.</p>
+      `},
+      {text:"Demo a finished example — inspire creative directions", badge:"demo"}
+    ]
+  },
+  {
+    num:"04", title:"Share & Wrap-Up", meta:"Publish + next steps", time:"~10 min",
+    items:[
+      {text:"Deploy to GitHub Pages or CodePen for a live URL", badge:"hands-on", detail:`
+        <p><strong>Option A — GitHub Pages (best for portfolios):</strong></p>
+        <p>1. Create a free account at <a href="https://github.com" target="_blank">github.com</a><br>
+        2. Create a new <strong>public</strong> repository named <code>yourusername.github.io</code><br>
+        3. Upload your <code>index.html</code> and model files via "Add file → Upload files"<br>
+        4. Go to Settings → Pages → set source branch to <code>main</code> → Save<br>
+        5. Your site goes live at <code>https://yourusername.github.io</code> within a minute or two</p>
+        <p><strong>Option B — CodePen (fastest, works instantly):</strong></p>
+        <p>Go to <a href="https://codepen.io/pen/" target="_blank">codepen.io/pen</a> → paste your HTML into the HTML panel → click "Change View → Full Page" to get a shareable HTTPS URL you can open directly on your phone. Note: upload your <code>.glb</code> model file to a free host like <a href="https://github.com" target="_blank">GitHub</a> first and reference it by URL.</p>
+        <div class="link-row">
+          <a class="link-pill" href="https://github.com" target="_blank">🐙 GitHub</a>
+          <a class="link-pill" href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site" target="_blank">📖 GitHub Pages docs</a>
+          <a class="link-pill" href="https://codepen.io/pen/" target="_blank">✏️ CodePen</a>
+        </div>
+      `},
+      {text:"Share your link with the room — quick show & tell", badge:"discuss"},
+      {text:"Recap what was built and key concepts learned", badge:"discuss"},
+      {text:"Resources to keep going: docs, communities, inspiration", badge:"discuss", detail:`
+        <p>Send students home with these links:</p>
+        <div class="link-row">
+          <a class="link-pill" href="https://aframe.io/docs/1.6.0/introduction/" target="_blank">📖 A-Frame Docs</a>
+          <a class="link-pill" href="https://ar-js-org.github.io/AR.js-Docs/" target="_blank">📖 AR.js Docs</a>
+          <a class="link-pill" href="https://aframe.io/blog/arjs/" target="_blank">✍️ A-Frame + AR.js tutorial</a>
+          <a class="link-pill" href="https://poly.pizza/" target="_blank">🍕 Poly Pizza models</a>
+          <a class="link-pill" href="https://sketchfab.com/features/free-3d-models" target="_blank">🎨 Sketchfab models</a>
+          <a class="link-pill" href="https://aframe.io/community/" target="_blank">💬 A-Frame community</a>
+          <a class="link-pill" href="https://ar-js-org.github.io/AR.js-Docs/#image-tracking-nft" target="_blank">🚀 Next level: Image Tracking</a>
+        </div>
+      `},
+      {text:"Q&A + open exploration time", badge:"discuss"}
+    ]
+  }
+];
+
+function badge(type){
+  if(!type) return '';
+  const cls={'hands-on':'badge-hands-on','demo':'badge-demo','discuss':'badge-discuss'}[type]||'';
+  return `<span class="item-badge ${cls}">${type}</span>`;
+}
+
+function buildSections(){
+  const wrap=document.getElementById('sections-wrap');
+  wrap.innerHTML='';
+  data.forEach((sec,si)=>{
+    const el=document.createElement('div');
+    el.className='section open';
+    el.innerHTML=`
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-num">${sec.num}</div>
+        <div class="section-title-wrap">
+          <div class="section-title">${sec.title}</div>
+          <div class="section-meta">${sec.meta}</div>
+        </div>
+        <div class="section-time">${sec.time}</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="section-body">
+        ${sec.items.map((item,ii)=>{
+          const hasDetail=!!item.detail;
+          return `
+          <div class="item" data-si="${si}" data-ii="${ii}" onclick="handleClick(event,this,${hasDetail})">
+            <div class="checkbox"><span class="checkmark">✓</span></div>
+            <div class="item-content">
+              <div class="item-top">
+                <span class="item-text">${item.text}</span>
+                ${badge(item.badge)}
+              </div>
+              ${hasDetail?`<div class="expand-hint" id="hint-${si}-${ii}">▶ tap to expand guide &amp; links</div>`:''}
+              ${hasDetail?`<div class="item-detail" id="detail-${si}-${ii}">${item.detail}</div>`:''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    wrap.appendChild(el);
+  });
+  updateProgress();
+}
+
+function handleClick(e,el,hasDetail){
+  if(e.target.tagName==='A') return;
+  if(hasDetail){
+    const si=el.dataset.si, ii=el.dataset.ii;
+    const detail=document.getElementById(`detail-${si}-${ii}`);
+    const hint=document.getElementById(`hint-${si}-${ii}`);
+    if(detail){
+      const open=detail.classList.toggle('open');
+      if(hint) hint.textContent=open?'▼ hide guide':'▶ tap to expand guide & links';
+    }
+  } else {
+    el.classList.toggle('done');
+    updateProgress();
+  }
+}
+
+function toggleSection(h){ h.closest('.section').classList.toggle('open'); }
+
+function updateProgress(){
+  const all=document.querySelectorAll('.item');
+  const done=document.querySelectorAll('.item.done');
+  const pct=all.length?(done.length/all.length)*100:0;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-text').textContent=`${done.length} / ${all.length} complete`;
+}
+
+function resetAll(){
+  document.querySelectorAll('.item.done').forEach(el=>el.classList.remove('done'));
+  updateProgress();
+}
+
+buildSections();
+</script>
+</body>
+</html>
