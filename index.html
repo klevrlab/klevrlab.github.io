@@ -450,15 +450,13 @@ const data = [
         </div>
       `},
       {text:"Load a 3D model (glTF/GLB) into the AR scene", badge:"hands-on", detail:`
-        <p>Replace the <code>&lt;a-box&gt;</code> placeholder with a <code>&lt;a-gltf-model&gt;</code> tag. You'll need a <code>.glb</code> or <code>.gltf</code> file — grab a free one from Poly Pizza first (see links below).</p>
-        <pre><code>&lt;a-marker preset="hiro"&gt;
-  &lt;a-gltf-model
-    src="your-model.glb"
-    position="0 0 0"
-    rotation="-90 0 0"
-    scale="0.5 0.5 0.5"&gt;
-  &lt;/a-gltf-model&gt;
-&lt;/a-marker&gt;</code></pre>
+        <p>Inside your <code>&lt;a-marker&gt;</code>, replace the <code>&lt;a-box&gt;</code> placeholder with a <code>&lt;a-gltf-model&gt;</code> tag and point it at a <code>.glb</code> file URL.</p>
+        <pre><code>&lt;a-gltf-model
+  src="your-model.glb"
+  position="0 0 0"
+  rotation="-90 0 0"
+  scale="0.5 0.5 0.5"&gt;
+&lt;/a-gltf-model&gt;</code></pre>
         <p>Adjust <code>scale</code> and <code>rotation</code> to get the model looking right — values vary between models. Start with <code>scale="0.1 0.1 0.1"</code> if unsure.</p>
         <div class="link-row">
           <a class="link-pill" href="https://poly.pizza/" target="_blank">🍕 Free models — Poly Pizza</a>
@@ -490,11 +488,18 @@ const data = [
     num:"03", title:"Customise & Enhance", meta:"Make it your own", time:"~15 min",
     items:[
       {text:"Swap in a custom 3D model or use a free asset (Sketchfab, Poly Pizza)", badge:"hands-on", detail:`
-        <p>Head to one of these free asset libraries and download a <code>.glb</code> file. Low-poly models load faster and track more reliably in AR.</p>
-        <p><strong>Tips for good AR models:</strong> Keep file size under 5MB, prefer GLB over GLTF+textures, and choose models that look good from above (since they sit on a flat marker).</p>
+        <p>The quickest way to get a model into your scene is to use a direct URL from the KhronosGroup's official sample assets — no downloading needed. Just paste the URL straight into your <code>src</code>:</p>
+        <pre><code>&lt;a-gltf-model
+  src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets/Models/Avocado/glTF-Binary/Avocado.glb"
+  position="0 0 0"
+  rotation="-90 0 0"
+  scale="0.5 0.5 0.5"&gt;
+&lt;/a-gltf-model&gt;</code></pre>
+        <p>Swap <code>Avocado</code> for any model name from the list below. Other good ones: <code>Duck</code>, <code>Box</code>, <code>FlightHelmet</code>.</p>
+        <p>For your own models, download a <code>.glb</code> from Poly Pizza, upload it to GitHub, and use the raw URL instead. Low-poly models load faster and track more reliably in AR — keep file size under 5MB.</p>
         <div class="link-row">
-          <a class="link-pill" href="https://poly.pizza/explore" target="_blank">🍕 Poly Pizza — browse all (10,500+ free)</a>
-          <a class="link-pill" href="https://sketchfab.com/features/free-3d-models" target="_blank">🎨 Sketchfab free models</a>
+          <a class="link-pill" href="https://github.khronos.org/glTF-Sample-Assets/" target="_blank">🔷 KhronosGroup sample models</a>
+          <a class="link-pill" href="https://poly.pizza/explore" target="_blank">🍕 Poly Pizza — browse all</a>
           <a class="link-pill" href="https://market.pmnd.rs/" target="_blank">🌐 Pmndrs Market (CC0)</a>
         </div>
       `},
